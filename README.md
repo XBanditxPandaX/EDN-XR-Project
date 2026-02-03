@@ -11,4 +11,4 @@ Ce dépôt contient un template de projet Unity préconfiguré pour le développ
   - `git lfs install`
   - `git clone https://github.com/<votre-nom-utilisateur>/EDN-XR-Project.git`
 
-https://sketchfab.com/3d-models/the-dive-bowling-alley-dd4f497ad8834dff8fd1c2874bb68190
+https://sketchfab.com/3d-models/crazy-lanes-bowling-alley-1b81afc980904a668522dae6e001f9d5
