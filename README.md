@@ -12,3 +12,4 @@ Ce dépôt contient un template de projet Unity préconfiguré pour le développ
   - `git clone https://github.com/<votre-nom-utilisateur>/EDN-XR-Project.git`
 
 https://sketchfab.com/3d-models/crazy-lanes-bowling-alley-1b81afc980904a668522dae6e001f9d5
+blend to fbx
