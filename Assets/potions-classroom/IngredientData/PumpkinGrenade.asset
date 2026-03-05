@@ -15,6 +15,6 @@ MonoBehaviour:
   ingredientType: 0
   displayName: Ingredient
   icon: {fileID: 0}
-  cauldronTintColor: {r: 0, g: 1, b: 0, a: 1}
+  cauldronTintColor: {r: 1, g: 0.58040816, b: 0, a: 1}
   destroyOnAdd: 1
   respawnDelay: 5
