@@ -5,15 +5,18 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/Scenes/VR Scene.unity
-    guid: 93a590788af8e464bb8ed7e65b78c43f
   - enabled: 1
+    path: Assets/Scenes/Potion classroom.unity
+    guid: 93a590788af8e464bb8ed7e65b78c43f
+  - enabled: 0
     path: Assets/Scenes/Bowling VR.unity
     guid: 81a789c5fa521224ba7f851091ffa8a5
   - enabled: 0
     path: Assets/Samples/XR Interaction Toolkit/2.6.4/Starter Assets/DemoScene.unity
     guid: 319dafa5c80f29f428dc1e0d03f04177
+  - enabled: 0
+    path: Assets/Scenes/VR Scene 1.unity
+    guid: 6502b5deeac072944bb900ab42384648
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: ce18139cfa441194ebbca9060709159d,
       type: 2}
