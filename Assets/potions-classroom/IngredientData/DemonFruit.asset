@@ -9,11 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 975057b4fdcfb8142b3080d19a5cc712, type: 3}
-  m_Name: OpenXR Editor Settings
+  m_Script: {fileID: 11500000, guid: eaa8a91b330779443bdbc0972853e1d1, type: 3}
+  m_Name: DemonFruit
   m_EditorClassIdentifier: 
-  Keys: 07000000
-  Values:
-  - featureSets:
-    - com.picoxr.openxr.features
-  m_vulkanAdditionalGraphicsQueue: 0
+  ingredientType: 0
+  displayName: "Fruit du d\xE9mon"
+  icon: {fileID: 0}
+  cauldronTintColor: {r: 0.1137255, g: 0.38431376, b: 0.4901961, a: 1}
+  destroyOnAdd: 1
+  respawnDelay: 5
