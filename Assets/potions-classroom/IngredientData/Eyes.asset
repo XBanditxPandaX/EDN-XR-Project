@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eaa8a91b330779443bdbc0972853e1d1, type: 3}
   m_Name: Eyes
   m_EditorClassIdentifier: 
-  ingredientType: 0
+  ingredientType: 3
   displayName: Yeux d'humains
   icon: {fileID: 0}
   cauldronTintColor: {r: 0.5754717, g: 0.31019548, b: 0.18187076, a: 1}

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eaa8a91b330779443bdbc0972853e1d1, type: 3}
   m_Name: PumpkinGrenade
   m_EditorClassIdentifier: 
-  ingredientType: 0
+  ingredientType: 2
   displayName: Citrouille
   icon: {fileID: 0}
   cauldronTintColor: {r: 1, g: 0.58040816, b: 0, a: 1}

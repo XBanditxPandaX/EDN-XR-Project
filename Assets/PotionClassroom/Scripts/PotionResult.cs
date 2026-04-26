@@ -26,7 +26,7 @@ namespace PotionClassroom
         [Header("Comportement")]
         [Tooltip("Detruit la potion apres ce delai si elle n'est pas ramassee (0 = jamais).")]
         [Min(0f)]
-        public float autoDestroyDelay = 30f;
+        public float autoDestroyDelay = 0f;
 
         [Tooltip("Son joue quand la potion est ramassee.")]
         public AudioClip pickupSound;
@@ -56,6 +56,7 @@ namespace PotionClassroom
         {
             _grab = GetComponent<XRGrabInteractable>();
             _grab.selectEntered.AddListener(OnPickedUp);
+            _grab.selectExited.AddListener(OnReleased);
 
             if (autoDestroyDelay > 0f)
                 StartCoroutine(AutoDestroyRoutine());
@@ -64,7 +65,10 @@ namespace PotionClassroom
         private void OnDestroy()
         {
             if (_grab != null)
+            {
                 _grab.selectEntered.RemoveListener(OnPickedUp);
+                _grab.selectExited.RemoveListener(OnReleased);
+            }
         }
 
         // ------------------------------------------------------------------
@@ -95,6 +99,22 @@ namespace PotionClassroom
 
             if (recipe != null)
                 Debug.Log($"[PotionResult] Potion ramassee : {recipe.resultPotionName}");
+        }
+
+        private void OnReleased(SelectExitEventArgs args)
+        {
+            StartCoroutine(EnableGravityNextFrame());
+        }
+
+        private IEnumerator EnableGravityNextFrame()
+        {
+            yield return null;
+            Rigidbody rb = GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.isKinematic = false;
+                rb.useGravity = true;
+            }
         }
 
         // ------------------------------------------------------------------

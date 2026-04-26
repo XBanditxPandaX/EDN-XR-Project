@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eaa8a91b330779443bdbc0972853e1d1, type: 3}
   m_Name: Calcifer
   m_EditorClassIdentifier: 
-  ingredientType: 0
+  ingredientType: 6
   displayName: Calcifer
   icon: {fileID: 0}
   cauldronTintColor: {r: 1, g: 0.27299303, b: 0.12941177, a: 1}

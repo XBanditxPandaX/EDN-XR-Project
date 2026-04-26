@@ -18,6 +18,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.XR.Interaction.Toolkit;
 
 namespace PotionClassroom
 {
@@ -45,6 +46,7 @@ namespace PotionClassroom
 
         [Tooltip("Referece vers le StirDetector (cherche automatiquement si non assigne).")]
         public StirDetector stirDetector;
+
 
         [Header("Feedback sonore")]
         [Tooltip("AudioSource pour les sons du chaudron.")]
@@ -148,7 +150,7 @@ namespace PotionClassroom
         // ------------------------------------------------------------------
         //  Brassage (declenche par StirDetector)
         // ------------------------------------------------------------------
-        private void HandleStirComplete()
+        public void HandleStirComplete()
         {
             if (_brewing) return;
             if (_addedIngredients.Count == 0)
@@ -210,9 +212,23 @@ namespace PotionClassroom
             {
                 Vector3 spawnPos = potionSpawnPoint != null
                     ? potionSpawnPoint.position
-                    : transform.position + Vector3.up * 0.5f;
+                    : new Vector3(-1.423f, 1.768f, -0.114f);
 
-                Instantiate(recipe.resultPrefab, spawnPos, Quaternion.identity);
+                GameObject potionGO = Instantiate(recipe.resultPrefab, spawnPos, recipe.resultPrefab.transform.rotation);
+                PotionResult potionResult = potionGO.GetComponent<PotionResult>();
+                if (potionResult != null)
+                    potionResult.Initialize(recipe);
+
+                // Desactive la physique jusqu'a ce que le joueur recupere la potion
+                Rigidbody rb = potionGO.GetComponent<Rigidbody>();
+                if (rb != null)
+                {
+                    rb.isKinematic = true;
+                    rb.useGravity = false;
+                    XRGrabInteractable grab = potionGO.GetComponent<XRGrabInteractable>();
+                    if (grab != null)
+                        grab.selectExited.AddListener(_ => StartCoroutine(EnableGravityNextFrame(rb)));
+                }
             }
 
             onPotionBrewed?.Invoke(recipe);
@@ -243,7 +259,7 @@ namespace PotionClassroom
         // ------------------------------------------------------------------
         //  Helpers
         // ------------------------------------------------------------------
-        private PotionRecipe FindMatchingRecipe()
+private PotionRecipe FindMatchingRecipe()
         {
             if (recipes == null) return null;
             foreach (PotionRecipe recipe in recipes)
@@ -286,6 +302,16 @@ namespace PotionClassroom
         {
             if (audioSource != null && clip != null)
                 audioSource.PlayOneShot(clip);
+        }
+
+        private IEnumerator EnableGravityNextFrame(Rigidbody rb)
+        {
+            yield return null;
+            if (rb != null)
+            {
+                rb.isKinematic = false;
+                rb.useGravity = true;
+            }
         }
 
         // ------------------------------------------------------------------

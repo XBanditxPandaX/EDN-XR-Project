@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eaa8a91b330779443bdbc0972853e1d1, type: 3}
   m_Name: DemonFruit
   m_EditorClassIdentifier: 
-  ingredientType: 0
+  ingredientType: 5
   displayName: "Fruit du d\xE9mon"
   icon: {fileID: 0}
   cauldronTintColor: {r: 0.1137255, g: 0.38431376, b: 0.4901961, a: 1}

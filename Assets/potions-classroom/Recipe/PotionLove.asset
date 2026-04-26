@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53b14429b9d8cf34ab3077773c19e74e, type: 3}
+  m_Name: PotionLove
+  m_EditorClassIdentifier:
+  requiredIngredients: 0500000006000000
+  resultPotionName: Potion d'amour
+  resultDescription:
+  resultColor: {r: 0.9, g: 0.2, b: 0.5, a: 1}
+  resultIcon: {fileID: 0}
+  resultPrefab: {fileID: 4957695346091484682, guid: cfc6b31f26781b1499549f0c31a7082b, type: 3}
+  brewSound: {fileID: 0}
+  brewVFXPrefab: {fileID: 0}
