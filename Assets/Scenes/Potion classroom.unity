@@ -8774,8 +8774,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameDuration: 120
   orderManager: {fileID: 532146714}
-  torah: {fileID: 532146715}
-  timerHeightAboveTorah: 0.3
+  hudDistance: 2
+  hudVerticalOffset: 0.35
 --- !u!4 &1226022712
 Transform:
   m_ObjectHideFlags: 0
@@ -10249,7 +10249,7 @@ PrefabInstance:
     - target: {fileID: 6598815579406187037, guid: 18ddb545287c546e19cc77dc9fbb2189,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -16349,7 +16349,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2571091950442385728
 Transform:
   m_ObjectHideFlags: 0
@@ -16561,7 +16561,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4672441944677077173
 Transform:
   m_ObjectHideFlags: 0

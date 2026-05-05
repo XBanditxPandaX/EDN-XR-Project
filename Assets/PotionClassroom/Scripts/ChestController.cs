@@ -21,7 +21,7 @@ namespace PotionClassroom
         public Vector3 openEuler   = new Vector3(-100f, 0f, 0f);
 
         [Header("Comportement")]
-        public float openDistance = 18f;
+        public float openDistance = 50f;
         public float animSpeed    = 2f;
 
         [Header("Stockage des potions")]

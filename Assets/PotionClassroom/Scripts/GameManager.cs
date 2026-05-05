@@ -12,10 +12,12 @@ namespace PotionClassroom
 
         [Header("References")]
         public OrderManager orderManager;
-        [Tooltip("Transform du parchemin Torah_S — le timer apparait au-dessus.")]
-        public Transform torah;
-        [Tooltip("Hauteur du timer au-dessus du parchemin.")]
-        public float timerHeightAboveTorah = 0.3f;
+
+        [Header("HUD")]
+        [Tooltip("Distance du HUD devant les yeux du joueur.")]
+        public float hudDistance = 2f;
+        [Tooltip("Hauteur du HUD (positif = haut de l'ecran).")]
+        public float hudVerticalOffset = 0.35f;
 
         // ------------------------------------------------------------------
         private float _timeRemaining;
@@ -36,6 +38,8 @@ namespace PotionClassroom
         private void Update()
         {
             if (!_gameRunning) return;
+
+            PositionHUD();
 
             _timeRemaining -= Time.deltaTime;
             if (_timeRemaining <= 0f)
@@ -89,7 +93,13 @@ namespace PotionClassroom
 
         private void PositionHUD()
         {
-            // Inutilise : le HUD est positionne une fois dans BuildHUD
+            Camera cam = Camera.main;
+            if (cam == null || _hudCanvas == null) return;
+
+            _hudCanvas.transform.position = cam.transform.position
+                + cam.transform.forward * hudDistance
+                + cam.transform.up * hudVerticalOffset;
+            _hudCanvas.transform.rotation = cam.transform.rotation;
         }
 
         // ------------------------------------------------------------------
@@ -97,25 +107,13 @@ namespace PotionClassroom
         {
             _hudCanvas = new GameObject("GameHUD");
 
-            // Attache au parchemin si disponible, sinon a la scene
-            if (torah != null)
-            {
-                _hudCanvas.transform.SetParent(torah);
-                _hudCanvas.transform.localPosition = Vector3.up * timerHeightAboveTorah;
-                _hudCanvas.transform.localRotation = Quaternion.identity;
-                _hudCanvas.transform.localScale    = Vector3.one;
-            }
-
             Canvas canvas = _hudCanvas.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.WorldSpace;
             _hudCanvas.AddComponent<CanvasScaler>();
 
             RectTransform rt = _hudCanvas.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(500f, 160f);
-            // Copie la scale du parchemin pour correspondre a sa taille
-            _hudCanvas.transform.localScale = torah != null
-                ? Vector3.one * 0.002f
-                : Vector3.one * 0.002f;
+            _hudCanvas.transform.localScale = Vector3.one * 0.002f;
 
             // --- Timer (haut) ---
             GameObject timerGo = new GameObject("Timer");
