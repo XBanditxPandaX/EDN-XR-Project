@@ -167,7 +167,7 @@ namespace PotionClassroom
             _brewing = true;
 
             // Petite pause theatrale
-            yield return new WaitForSeconds(1.0f);
+            yield return new WaitForSeconds(0.2f);
 
             PotionRecipe matched = FindMatchingRecipe();
 
@@ -205,7 +205,7 @@ namespace PotionClassroom
             // Change la couleur du liquide
             SetLiquidColor(recipe.resultColor);
 
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.1f);
 
             // Spawn la fiole/potion
             if (recipe.resultPrefab != null)
@@ -215,6 +215,7 @@ namespace PotionClassroom
                     : new Vector3(-1.423f, 1.768f, -0.114f);
 
                 GameObject potionGO = Instantiate(recipe.resultPrefab, spawnPos, recipe.resultPrefab.transform.rotation);
+                potionGO.AddComponent<CraftedPotion>().recipe = recipe;
                 PotionResult potionResult = potionGO.GetComponent<PotionResult>();
                 if (potionResult != null)
                     potionResult.Initialize(recipe);
