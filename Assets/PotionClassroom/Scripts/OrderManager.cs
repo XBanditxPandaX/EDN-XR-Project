@@ -58,6 +58,10 @@ namespace PotionClassroom
         public Button confirmButton;
         public GameManager gameManager;
 
+        [Header("Demarrage")]
+        [Tooltip("Genere une commande des que l'OrderManager demarre.")]
+        public bool generateOrderOnStart = true;
+
         [Header("Parametres commande")]
         [Min(1)] public int minPotions = 1;
         [Range(1, 3)] public int maxPotions = 3;
@@ -65,6 +69,8 @@ namespace PotionClassroom
         // ------------------------------------------------------------------
         private List<PotionRecipe> _currentOrder  = new List<PotionRecipe>();
         private List<GameObject>   _spawnedObjects = new List<GameObject>();
+        private bool _isInitialized = false;
+        private bool _ordersActive = false;
 
         // ------------------------------------------------------------------
         private void Start()
@@ -78,11 +84,37 @@ namespace PotionClassroom
             if (confirmButton != null)
                 confirmButton.onClick.AddListener(OnConfirmClicked);
 
-            GenerateNewOrder();
+            _isInitialized = true;
+
+            if (generateOrderOnStart)
+                BeginOrders();
+            else
+                PrepareForTutorial();
+        }
+
+        public void PrepareForTutorial()
+        {
+            generateOrderOnStart = false;
+            _ordersActive = false;
+            ClearDisplay();
+            HideAllTemplates();
+            SetConfirmButtonVisible(false);
+        }
+
+        public void BeginOrders()
+        {
+            generateOrderOnStart = true;
+            _ordersActive = true;
+            SetConfirmButtonVisible(true);
+
+            if (_isInitialized)
+                GenerateNewOrder();
         }
 
         public void GenerateNewOrder()
         {
+            _ordersActive = true;
+            SetConfirmButtonVisible(true);
             ClearDisplay();
             _currentOrder.Clear();
 
@@ -247,11 +279,19 @@ namespace PotionClassroom
                 if (e.canvasTemplate != null) e.canvasTemplate.SetActive(false);
         }
 
+        private void SetConfirmButtonVisible(bool visible)
+        {
+            if (confirmButton != null)
+                confirmButton.gameObject.SetActive(visible);
+        }
+
         // ------------------------------------------------------------------
         //  Validation
         // ------------------------------------------------------------------
         private void OnConfirmClicked()
         {
+            if (!_ordersActive) return;
+
             List<PotionRecipe> stored   = chest.GetStoredRecipes();
             List<PotionRecipe> required = new List<PotionRecipe>(_currentOrder);
 

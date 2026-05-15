@@ -5153,6 +5153,7 @@ MonoBehaviour:
   chest: {fileID: 2033653611}
   confirmButton: {fileID: 234403936}
   gameManager: {fileID: 1226022711}
+  generateOrderOnStart: 0
   minPotions: 1
   maxPotions: 3
 --- !u!4 &532146715 stripped
@@ -8774,8 +8775,34 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameDuration: 120
   orderManager: {fileID: 532146714}
+  playerRig: {fileID: 3012408812359162173}
   hudDistance: 2
   hudVerticalOffset: 0.85
+  gameOverDistance: 2
+  gameOverVerticalOffset: 0.05
+  showTutorialOnStart: 1
+  showTutorialOnlyOnce: 1
+  placePlayerInFrontOfOrders: 1
+  tutorialMinimumEyeHeight: 1.85
+  tutorialCameraOffsetFromOrders: {x: 1, y: 0.15, z: -1.65}
+  tutorialLookAtOffset: {x: 0, y: 0, z: 0}
+  tutorialPlacementLockDuration: 1
+  pinTutorialScreenToOrders: 1
+  tutorialScreenDistance: 2.5
+  tutorialScreenVerticalOffset: 0.02
+  tutorialTitleFontSize: 65
+  tutorialBodyFontSize: 45
+  tutorialBodyLineSpacing: -10
+  tutorialTitleArea: {x: 0.04, y: 0.8, z: 1, w: 0.98}
+  tutorialBodyArea: {x: 0, y: 0.24, z: 1, w: 0.78}
+  tutorialStartButtonArea: {x: 0.34, y: 0.02, z: 0.58, w: 0.18}
+  tutorialIntroText: Bienvenue dans l'atelier de potions.
+  tutorialRulesText: "Lis la commande sur le parchemin, pr\xE9pare les potions demand\xE9es,
+    d\xE9pose-les dans le coffre, puis valide avec le bouton."
+  tutorialScoreText: "Chaque commande valid\xE9e ajoute 1 point. Fais le meilleur
+    score avant la fin du chrono."
+  tutorialNextButtonText: Suivant
+  tutorialStartButtonText: Start
 --- !u!4 &1226022712
 Transform:
   m_ObjectHideFlags: 0
@@ -10249,7 +10276,7 @@ PrefabInstance:
     - target: {fileID: 6598815579406187037, guid: 18ddb545287c546e19cc77dc9fbb2189,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

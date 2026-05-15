@@ -14,6 +14,8 @@ namespace PotionClassroom
 
         [Header("References")]
         public OrderManager orderManager;
+        [Tooltip("Rig XR a deplacer pour le tutoriel. Laisse vide pour le detecter automatiquement.")]
+        public Transform playerRig;
 
         [Header("HUD")]
         [Tooltip("Distance du HUD devant les yeux du joueur.")]
@@ -27,7 +29,53 @@ namespace PotionClassroom
         [Tooltip("Hauteur de l'ecran Game Over devant les yeux du joueur.")]
         public float gameOverVerticalOffset = 0.05f;
 
+        [Header("Tutoriel")]
+        public bool showTutorialOnStart = true;
+        [Tooltip("Si actif, le tutoriel ne reapparait pas apres un restart de scene.")]
+        public bool showTutorialOnlyOnce = true;
+        [Tooltip("Place le joueur devant le parchemin des commandes au lancement.")]
+        public bool placePlayerInFrontOfOrders = true;
+        [Tooltip("Hauteur minimale des yeux du joueur pendant le tutoriel.")]
+        public float tutorialMinimumEyeHeight = 1.85f;
+        [Tooltip("Offset monde applique depuis Torah_S pour placer la camera du joueur au tutoriel.")]
+        public Vector3 tutorialCameraOffsetFromOrders = new Vector3(0f, 0.15f, -1.65f);
+        [Tooltip("Offset monde du point que le joueur regarde sur Torah_S.")]
+        public Vector3 tutorialLookAtOffset = Vector3.zero;
+        [Tooltip("Duree pendant laquelle le placement est reapplique apres les updates XR.")]
+        public float tutorialPlacementLockDuration = 1f;
+        [Tooltip("Affiche l'ecran tutoriel directement sur le parchemin plutot que devant les yeux.")]
+        public bool pinTutorialScreenToOrders = true;
+        [Tooltip("Distance de l'ecran tutoriel devant les yeux du joueur.")]
+        public float tutorialScreenDistance = 1.6f;
+        [Tooltip("Hauteur de l'ecran tutoriel devant les yeux du joueur.")]
+        public float tutorialScreenVerticalOffset = 0.02f;
+        [Tooltip("Taille du titre du tutoriel.")]
+        public float tutorialTitleFontSize = 62f;
+        [Tooltip("Taille du texte du tutoriel.")]
+        public float tutorialBodyFontSize = 34f;
+        [Tooltip("Espacement vertical des lignes du texte du tutoriel.")]
+        public float tutorialBodyLineSpacing = -10f;
+        [Tooltip("Zone du titre dans le canvas tutoriel, en proportions 0-1.")]
+        public Vector4 tutorialTitleArea = new Vector4(0.02f, 0.80f, 0.95f, 0.98f);
+        [Tooltip("Zone du texte dans le canvas tutoriel, en proportions 0-1.")]
+        public Vector4 tutorialBodyArea = new Vector4(0.02f, 0.24f, 0.95f, 0.78f);
+        [Tooltip("Zone du bouton Suivant/Start dans le canvas tutoriel, en proportions 0-1.")]
+        public Vector4 tutorialStartButtonArea = new Vector4(0.34f, 0.02f, 0.58f, 0.18f);
+        [TextArea(2, 4)]
+        public string tutorialIntroText = "Bienvenue dans l'atelier de potions.";
+        [TextArea(4, 8)]
+        public string tutorialRulesText =
+            "Lis la commande sur le parchemin, prépare les potions demandées, dépose-les dans le coffre, puis valide avec le bouton.";
+        [TextArea(2, 4)]
+        public string tutorialScoreText =
+            "Chaque commande validée ajoute 1 point. Fais le meilleur score avant la fin du chrono.";
+        public string tutorialNextButtonText = "Suivant";
+        public string tutorialStartButtonText = "Start";
+
         // ------------------------------------------------------------------
+        private static bool _tutorialAlreadyShown = false;
+        private static bool _skipTutorialOnNextLoad = false;
+
         private float _timeRemaining;
         private int   _score = 0;
         private bool  _gameRunning = false;
@@ -37,18 +85,53 @@ namespace PotionClassroom
         private TextMeshProUGUI  _scoreText;
         private GameObject       _gameOverCanvas;
         private TextMeshProUGUI  _gameOverScoreText;
+        private GameObject       _tutorialCanvas;
+        private TextMeshProUGUI  _tutorialTitleText;
+        private TextMeshProUGUI  _tutorialBodyText;
+        private TextMeshProUGUI  _tutorialButtonLabelText;
+        private Button           _tutorialButton;
+        private int              _tutorialPageIndex = 0;
+        private float            _tutorialPlacementUntilTime = -1f;
+        private bool             _lockPlayerPlacement = false;
 
         // ------------------------------------------------------------------
+        private void Awake()
+        {
+            if (orderManager != null)
+                orderManager.PrepareForTutorial();
+        }
+
         private void Start()
         {
             BuildHUD();
             BuildGameOverScreen();
-            StartGame();
+            BuildTutorialScreen();
+
+            bool shouldShowTutorial = ShouldShowTutorial();
+            _skipTutorialOnNextLoad = false;
+
+            if (shouldShowTutorial)
+            {
+                if (_hudCanvas != null)
+                    _hudCanvas.SetActive(false);
+
+                ShowTutorialScreen();
+            }
+            else
+            {
+                BeginPlayerPlacementLock();
+                StartGame();
+            }
         }
 
         private void Update()
         {
-            PositionHUD();
+            if (_hudCanvas != null && _hudCanvas.activeSelf)
+                PositionHUD();
+
+            if (_tutorialCanvas != null && _tutorialCanvas.activeSelf && !pinTutorialScreenToOrders)
+                PositionTutorialScreen();
+
             if (_gameOverCanvas != null && _gameOverCanvas.activeSelf)
                 PositionGameOverScreen();
 
@@ -65,14 +148,35 @@ namespace PotionClassroom
             RefreshHUD();
         }
 
+        private void LateUpdate()
+        {
+            if (!_lockPlayerPlacement) return;
+
+            if (Time.time > _tutorialPlacementUntilTime)
+            {
+                _lockPlayerPlacement = false;
+                return;
+            }
+
+            PlacePlayerForTutorial();
+        }
+
         // ------------------------------------------------------------------
         public void StartGame()
         {
             _timeRemaining = gameDuration;
             _score         = 0;
             _gameRunning   = true;
+
+            if (_tutorialCanvas != null)
+                _tutorialCanvas.SetActive(false);
+            if (_hudCanvas != null)
+                _hudCanvas.SetActive(true);
             if (_gameOverCanvas != null)
                 _gameOverCanvas.SetActive(false);
+
+            orderManager?.chest?.ClearChest();
+            orderManager?.BeginOrders();
             RefreshHUD();
         }
 
@@ -87,11 +191,26 @@ namespace PotionClassroom
 
         public void RestartGame()
         {
+            _tutorialAlreadyShown = true;
+            _skipTutorialOnNextLoad = true;
+
             Scene activeScene = SceneManager.GetActiveScene();
             if (activeScene.buildIndex >= 0)
                 SceneManager.LoadScene(activeScene.buildIndex);
             else
                 SceneManager.LoadScene(activeScene.name);
+        }
+
+        public void AdvanceTutorial()
+        {
+            if (_tutorialPageIndex < 2)
+            {
+                _tutorialPageIndex++;
+                RefreshTutorialPage();
+                return;
+            }
+
+            StartGame();
         }
 
         // ------------------------------------------------------------------
@@ -102,6 +221,9 @@ namespace PotionClassroom
             _timerText.text  = "00:00";
             _timerText.color = Color.red;
             _scoreText.text  = $"Termine !\nScore : {_score}";
+
+            if (_hudCanvas != null)
+                _hudCanvas.SetActive(false);
 
             if (orderManager != null)
                 orderManager.gameObject.SetActive(false);
@@ -140,6 +262,89 @@ namespace PotionClassroom
                 + cam.transform.forward * gameOverDistance
                 + cam.transform.up * gameOverVerticalOffset;
             _gameOverCanvas.transform.rotation = cam.transform.rotation;
+        }
+
+        private void PositionTutorialScreen()
+        {
+            Camera cam = Camera.main;
+            if (cam == null || _tutorialCanvas == null) return;
+
+            if (pinTutorialScreenToOrders && orderManager != null && orderManager.displayParent != null)
+            {
+                Vector3 targetCenter = GetTutorialTargetCenter();
+                Vector3 toScreen = targetCenter - cam.transform.position;
+                if (toScreen.sqrMagnitude < 0.001f)
+                    toScreen = cam.transform.forward;
+
+                _tutorialCanvas.transform.position = targetCenter - toScreen.normalized * 0.03f;
+                _tutorialCanvas.transform.rotation = Quaternion.LookRotation(toScreen.normalized, Vector3.up);
+                return;
+            }
+
+            _tutorialCanvas.transform.position = cam.transform.position
+                + cam.transform.forward * tutorialScreenDistance
+                + cam.transform.up * tutorialScreenVerticalOffset;
+            _tutorialCanvas.transform.rotation = cam.transform.rotation;
+        }
+
+        private bool ShouldShowTutorial()
+        {
+            return showTutorialOnStart && !_skipTutorialOnNextLoad && (!showTutorialOnlyOnce || !_tutorialAlreadyShown);
+        }
+
+        private void BeginPlayerPlacementLock()
+        {
+            PlacePlayerForTutorial();
+            _tutorialPlacementUntilTime = Time.time + Mathf.Max(0.1f, tutorialPlacementLockDuration);
+            _lockPlayerPlacement = true;
+        }
+
+        private void PlacePlayerForTutorial()
+        {
+            if (!placePlayerInFrontOfOrders || orderManager == null || orderManager.displayParent == null)
+                return;
+
+            Camera cam = Camera.main;
+            if (cam == null) return;
+
+            Transform rig = playerRig != null ? playerRig : FindPlayerRig(cam.transform);
+            if (rig == null) return;
+
+            Vector3 targetCenter = GetTutorialTargetCenter();
+            Vector3 desiredCameraPosition = targetCenter + tutorialCameraOffsetFromOrders;
+            desiredCameraPosition.y = Mathf.Max(desiredCameraPosition.y, tutorialMinimumEyeHeight);
+
+            Vector3 desiredForward = targetCenter - desiredCameraPosition;
+            desiredForward.y = 0f;
+
+            Vector3 currentForward = cam.transform.forward;
+            currentForward.y = 0f;
+
+            if (desiredForward.sqrMagnitude > 0.001f && currentForward.sqrMagnitude > 0.001f)
+            {
+                float yaw = Vector3.SignedAngle(currentForward.normalized, desiredForward.normalized, Vector3.up);
+                rig.RotateAround(cam.transform.position, Vector3.up, yaw);
+            }
+
+            rig.position += desiredCameraPosition - cam.transform.position;
+        }
+
+        private Vector3 GetTutorialTargetCenter()
+        {
+            return orderManager.displayParent.position + tutorialLookAtOffset;
+        }
+
+        private Transform FindPlayerRig(Transform start)
+        {
+            Transform current = start;
+            while (current != null)
+            {
+                if (current.name.Contains("XR Origin"))
+                    return current;
+                current = current.parent;
+            }
+
+            return start.root;
         }
 
         // ------------------------------------------------------------------
@@ -251,6 +456,81 @@ namespace PotionClassroom
             _gameOverCanvas.SetActive(false);
         }
 
+        private void BuildTutorialScreen()
+        {
+            int uiLayer = LayerMask.NameToLayer("UI");
+            if (uiLayer < 0) uiLayer = 0;
+
+            _tutorialCanvas = new GameObject("TutorialScreen");
+            _tutorialCanvas.layer = uiLayer;
+
+            Canvas canvas = _tutorialCanvas.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.WorldSpace;
+            _tutorialCanvas.AddComponent<CanvasScaler>();
+            _tutorialCanvas.AddComponent<TrackedDeviceGraphicRaycaster>();
+
+            RectTransform rt = _tutorialCanvas.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(620f, 380f);
+            _tutorialCanvas.transform.localScale = Vector3.one * 0.002f;
+
+            GameObject panelGo = new GameObject("Panel");
+            panelGo.layer = uiLayer;
+            panelGo.transform.SetParent(_tutorialCanvas.transform, false);
+
+            Image panel = panelGo.AddComponent<Image>();
+            panel.color = Color.clear;
+            panel.raycastTarget = false;
+
+            RectTransform panelRt = panelGo.GetComponent<RectTransform>();
+            panelRt.anchorMin = Vector2.zero;
+            panelRt.anchorMax = Vector2.one;
+            panelRt.offsetMin = Vector2.zero;
+            panelRt.offsetMax = Vector2.zero;
+
+            Color inkColor = new Color(0.01f, 0.006f, 0.002f, 1f);
+
+            _tutorialTitleText = CreateText(panelGo.transform, "Title", "TUTORIEL", tutorialTitleFontSize, inkColor,
+                TextAlignmentOptions.Center, AreaMin(tutorialTitleArea), AreaMax(tutorialTitleArea), uiLayer);
+            _tutorialTitleText.fontStyle = FontStyles.Bold;
+
+            _tutorialBodyText = CreateText(panelGo.transform, "Instructions", tutorialIntroText, tutorialBodyFontSize, inkColor,
+                TextAlignmentOptions.MidlineLeft, AreaMin(tutorialBodyArea), AreaMax(tutorialBodyArea), uiLayer);
+            _tutorialBodyText.fontStyle = FontStyles.Bold;
+            _tutorialBodyText.lineSpacing = tutorialBodyLineSpacing;
+
+            GameObject buttonGo = new GameObject("StartButton");
+            buttonGo.layer = uiLayer;
+            buttonGo.transform.SetParent(panelGo.transform, false);
+
+            Image buttonImage = buttonGo.AddComponent<Image>();
+            buttonImage.color = new Color(0.36f, 0.88f, 0.22f, 1f);
+
+            _tutorialButton = buttonGo.AddComponent<Button>();
+            _tutorialButton.targetGraphic = buttonImage;
+            _tutorialButton.colors = new ColorBlock
+            {
+                normalColor = new Color(0.36f, 0.88f, 0.22f, 1f),
+                highlightedColor = new Color(0.58f, 1f, 0.4f, 1f),
+                pressedColor = new Color(0.18f, 0.62f, 0.1f, 1f),
+                selectedColor = new Color(0.45f, 0.95f, 0.28f, 1f),
+                disabledColor = new Color(0.55f, 0.55f, 0.55f, 0.5f),
+                colorMultiplier = 1f,
+                fadeDuration = 0.08f
+            };
+            _tutorialButton.onClick.AddListener(AdvanceTutorial);
+
+            RectTransform buttonRt = buttonGo.GetComponent<RectTransform>();
+            buttonRt.anchorMin = AreaMin(tutorialStartButtonArea);
+            buttonRt.anchorMax = AreaMax(tutorialStartButtonArea);
+            buttonRt.offsetMin = Vector2.zero;
+            buttonRt.offsetMax = Vector2.zero;
+
+            _tutorialButtonLabelText = CreateText(buttonGo.transform, "Label", tutorialNextButtonText, 28, Color.black, TextAlignmentOptions.Center,
+                Vector2.zero, Vector2.one, uiLayer);
+
+            _tutorialCanvas.SetActive(false);
+        }
+
         private TextMeshProUGUI CreateText(
             Transform parent,
             string name,
@@ -271,6 +551,7 @@ namespace PotionClassroom
             tmp.fontSize = fontSize;
             tmp.color = color;
             tmp.alignment = alignment;
+            tmp.enableWordWrapping = true;
             tmp.raycastTarget = false;
 
             RectTransform rt = go.GetComponent<RectTransform>();
@@ -282,6 +563,29 @@ namespace PotionClassroom
             return tmp;
         }
 
+        private Vector2 AreaMin(Vector4 area) => new Vector2(area.x, area.y);
+
+        private Vector2 AreaMax(Vector4 area) => new Vector2(area.z, area.w);
+
+        private void RefreshTutorialPage()
+        {
+            if (_tutorialTitleText != null)
+                _tutorialTitleText.gameObject.SetActive(_tutorialPageIndex == 0);
+
+            if (_tutorialBodyText != null)
+            {
+                _tutorialBodyText.text = _tutorialPageIndex switch
+                {
+                    0 => tutorialIntroText,
+                    1 => tutorialRulesText,
+                    _ => tutorialScoreText
+                };
+            }
+
+            if (_tutorialButtonLabelText != null)
+                _tutorialButtonLabelText.text = _tutorialPageIndex < 2 ? tutorialNextButtonText : tutorialStartButtonText;
+        }
+
         private void ShowGameOverScreen()
         {
             if (_gameOverCanvas == null) return;
@@ -291,6 +595,18 @@ namespace PotionClassroom
 
             _gameOverCanvas.SetActive(true);
             PositionGameOverScreen();
+        }
+
+        private void ShowTutorialScreen()
+        {
+            if (_tutorialCanvas == null) return;
+
+            _tutorialAlreadyShown = true;
+            _tutorialPageIndex = 0;
+            RefreshTutorialPage();
+            BeginPlayerPlacementLock();
+            _tutorialCanvas.SetActive(true);
+            PositionTutorialScreen();
         }
     }
 }
