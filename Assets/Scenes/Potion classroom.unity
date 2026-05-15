@@ -8775,7 +8775,7 @@ MonoBehaviour:
   gameDuration: 120
   orderManager: {fileID: 532146714}
   hudDistance: 2
-  hudVerticalOffset: 0.35
+  hudVerticalOffset: 0.85
 --- !u!4 &1226022712
 Transform:
   m_ObjectHideFlags: 0
