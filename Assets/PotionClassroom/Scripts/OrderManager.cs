@@ -58,6 +58,11 @@ namespace PotionClassroom
         public Button confirmButton;
         public GameManager gameManager;
 
+        [Header("Audio")]
+        public AudioClip orderCompleteSound;
+        [Range(0f,1f)] public float orderCompleteSoundVolume = 1f;
+        private AudioSource _audio;
+
         [Header("Demarrage")]
         [Tooltip("Genere une commande des que l'OrderManager demarre.")]
         public bool generateOrderOnStart = true;
@@ -78,6 +83,11 @@ namespace PotionClassroom
             Debug.Log($"[OrderManager] displayParent = {(displayParent != null ? displayParent.name : "NULL")}");
             Debug.Log($"[OrderManager] ingredientCanvases : {ingredientCanvases?.Length ?? 0} entrees");
             Debug.Log($"[OrderManager] potionCanvases : {potionCanvases?.Length ?? 0} entrees");
+
+            _audio = gameObject.AddComponent<AudioSource>();
+            _audio.playOnAwake   = false;
+            _audio.spatialBlend  = 0f;
+            _audio.volume        = 1f;
 
             HideAllTemplates();
 
@@ -302,6 +312,8 @@ namespace PotionClassroom
             if (success)
             {
                 Debug.Log("[OrderManager] Commande validee !");
+                if (orderCompleteSound != null)
+                    _audio.PlayOneShot(orderCompleteSound, orderCompleteSoundVolume);
                 chest.ClearChest();
                 gameManager?.OnOrderValidated();
                 GenerateNewOrder();

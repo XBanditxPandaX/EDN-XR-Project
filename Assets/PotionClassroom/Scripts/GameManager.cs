@@ -8,6 +8,10 @@ namespace PotionClassroom
 {
     public class GameManager : MonoBehaviour
     {
+        [Header("Audio")]
+        public AudioClip ambientMusic;
+        [Range(0f, 1f)] public float ambientVolume = 0.3f;
+
         [Header("Partie")]
         [Tooltip("Duree totale de la partie en secondes.")]
         public float gameDuration = 120f;
@@ -103,6 +107,17 @@ namespace PotionClassroom
 
         private void Start()
         {
+            if (ambientMusic != null)
+            {
+                AudioSource amb = gameObject.AddComponent<AudioSource>();
+                amb.clip         = ambientMusic;
+                amb.loop         = true;
+                amb.playOnAwake  = false;
+                amb.spatialBlend = 0f;
+                amb.volume       = ambientVolume;
+                amb.Play();
+            }
+
             BuildHUD();
             BuildGameOverScreen();
             BuildTutorialScreen();

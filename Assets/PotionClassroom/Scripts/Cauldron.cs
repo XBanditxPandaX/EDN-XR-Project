@@ -58,6 +58,18 @@ namespace PotionClassroom
         [Tooltip("Son joue quand la recette echoue.")]
         public AudioClip recipeFailSound;
 
+        [Tooltip("Son joue quand une potion est creee avec succes.")]
+        public AudioClip brewSuccessSound;
+        [Range(0f, 1f)] public float brewSuccessSoundVolume = 1f;
+
+        [Tooltip("Son de bouillonnement (loop) pendant la preparation.")]
+        public AudioClip boilingLoopSound;
+
+        [Tooltip("Volume du bouillonnement (0-1).")]
+        [Range(0f, 1f)] public float boilingVolume = 0.45f;
+
+        private AudioSource _loopSource;
+
         [Header("Evenements")]
         [Tooltip("Declenche quand un ingredient est ajoute. Passe le nom de l'ingredient.")]
         public UnityEvent<string> onIngredientAdded;
@@ -92,7 +104,20 @@ namespace PotionClassroom
         // ------------------------------------------------------------------
         private void Awake()
         {
-            // Cherche le StirDetector si non assigne
+            if (audioSource == null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.playOnAwake  = false;
+            }
+            audioSource.spatialBlend = 0f;
+
+            // AudioSource loop pour le bouillonnement
+            _loopSource = gameObject.AddComponent<AudioSource>();
+            _loopSource.loop         = true;
+            _loopSource.playOnAwake  = false;
+            _loopSource.volume       = boilingVolume;
+            _loopSource.spatialBlend = 1f;
+
             if (stirDetector == null)
                 stirDetector = GetComponentInChildren<StirDetector>();
 
@@ -138,10 +163,16 @@ namespace PotionClassroom
             bool consumed = ingredient.Consume();
             if (!consumed) return;
 
-            // Enregistre et met a jour la couleur du liquide
             _addedIngredients.Add(type);
             BlendLiquidColor(ingColor);
             PlaySound(ingredientAddedSound);
+
+            if (_addedIngredients.Count == 1 && boilingLoopSound != null && !_loopSource.isPlaying)
+            {
+                _loopSource.clip = boilingLoopSound;
+                _loopSource.time = 0f;
+                _loopSource.Play();
+            }
 
             Debug.Log($"[Cauldron] Ingredient ajoute : {ingName} ({type}). Total : {_addedIngredients.Count}");
             onIngredientAdded?.Invoke(ingName);
@@ -198,8 +229,11 @@ namespace PotionClassroom
                 Destroy(vfx, 3f);
             }
 
-            // Son
-            if (audioSource != null && recipe.brewSound != null)
+            _loopSource.Stop();
+
+            if (audioSource != null && brewSuccessSound != null)
+                audioSource.PlayOneShot(brewSuccessSound, brewSuccessSoundVolume);
+            else if (audioSource != null && recipe.brewSound != null)
                 audioSource.PlayOneShot(recipe.brewSound);
 
             // Change la couleur du liquide
@@ -241,6 +275,7 @@ namespace PotionClassroom
 
         private IEnumerator BrewFail()
         {
+            _loopSource.Stop();
             PlaySound(recipeFailSound);
 
             // Clignote rouge pour indiquer l'echec

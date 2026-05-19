@@ -5153,6 +5153,8 @@ MonoBehaviour:
   chest: {fileID: 2033653611}
   confirmButton: {fileID: 234403936}
   gameManager: {fileID: 1226022711}
+  orderCompleteSound: {fileID: 8300000, guid: a520c583c7c2d6440ba69ee97f2b1df3, type: 3}
+  orderCompleteSoundVolume: 0.8
   generateOrderOnStart: 0
   minPotions: 1
   maxPotions: 3
@@ -8773,6 +8775,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49302f0e86b7e2a4abddbc169cacd2ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ambientMusic: {fileID: 8300000, guid: 0d474da8dbd613240988cbd0ab508f35, type: 3}
+  ambientVolume: 1
   gameDuration: 120
   orderManager: {fileID: 532146714}
   playerRig: {fileID: 3012408812359162173}
@@ -9847,7 +9851,7 @@ MonoBehaviour:
   m_AllowAnchorControl: 1
   m_UseForceGrab: 0
   m_RotateSpeed: 180
-  m_TranslateSpeed: 1
+  m_TranslateSpeed: 10
   m_AnchorRotateReferenceFrame: {fileID: 0}
   m_AnchorRotationMode: 0
   m_UIHoverEntered:
@@ -11223,6 +11227,9 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   ingredientAddedSound: {fileID: 0}
   recipeFailSound: {fileID: 0}
+  brewSuccessSound: {fileID: 8300000, guid: 0cef40bcb23889145bfeaad79f14e879, type: 3}
+  boilingLoopSound: {fileID: 8300000, guid: db1406fdfe4a2d64dac46204c1dbad05, type: 3}
+  boilingVolume: 1
   onIngredientAdded:
     m_PersistentCalls:
       m_Calls: []
@@ -20781,7 +20788,7 @@ MonoBehaviour:
   m_AllowAnchorControl: 1
   m_UseForceGrab: 0
   m_RotateSpeed: 180
-  m_TranslateSpeed: 1
+  m_TranslateSpeed: 10
   m_AnchorRotateReferenceFrame: {fileID: 0}
   m_AnchorRotationMode: 0
   m_UIHoverEntered:
