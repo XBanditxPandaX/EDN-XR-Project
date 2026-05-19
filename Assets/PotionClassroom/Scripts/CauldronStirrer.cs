@@ -25,6 +25,9 @@ namespace PotionClassroom
         [Tooltip("Rayon du cercle que decrit le baton.")]
         public float stirRadius = 0.15f;
 
+        public event System.Action OnStirStart;
+        public event System.Action OnStirEnd;
+
         private bool _isStirring = false;
         private Vector3 _stirrerStartLocalPos;
         private XRSimpleInteractable _interactable;
@@ -78,6 +81,7 @@ namespace PotionClassroom
         private IEnumerator StirRoutine()
         {
             _isStirring = true;
+            OnStirStart?.Invoke();
 
             float totalAngle = 360f * turns;
             float accumulated = 0f;
@@ -103,6 +107,7 @@ namespace PotionClassroom
                 stirrer.localPosition = _stirrerStartLocalPos;
 
             _isStirring = false;
+            OnStirEnd?.Invoke();
 
             Debug.Log("[CauldronStirrer] Touillement termine, brassage lance.");
             cauldron.HandleStirComplete();

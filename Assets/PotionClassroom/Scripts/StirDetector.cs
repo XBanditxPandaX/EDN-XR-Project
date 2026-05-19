@@ -60,9 +60,7 @@ namespace PotionClassroom
         // ------------------------------------------------------------------
         //  Evenements
         // ------------------------------------------------------------------
-        /// <summary>
-        /// Declenche quand le brassage est valide (nombre de tours atteint).
-        /// </summary>
+        public event Action OnStirStart;
         public event Action OnStirComplete;
 
         // ------------------------------------------------------------------
@@ -175,6 +173,7 @@ namespace PotionClassroom
             _stirCompleted       = false;
 
             PlayStirSound();
+            OnStirStart?.Invoke();
             Debug.Log("[StirDetector] Objet dans la zone — suivi commence.");
         }
 
