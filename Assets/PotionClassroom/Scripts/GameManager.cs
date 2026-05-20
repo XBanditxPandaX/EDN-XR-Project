@@ -21,6 +21,14 @@ namespace PotionClassroom
         [Tooltip("Rig XR a deplacer pour le tutoriel. Laisse vide pour le detecter automatiquement.")]
         public Transform playerRig;
 
+        [Header("Spawn joueur")]
+        [Tooltip("Si actif, le placement garde la position du XR Rig definie dans la scene au lieu de recalculer une position depuis Torah_S.")]
+        public bool keepSceneStartPosition = true;
+        [Tooltip("Point de spawn explicite optionnel. Si assigne, il remplace la position initiale du XR Rig.")]
+        public Transform playerStartPoint;
+        [Tooltip("Tourne le joueur vers le parchemin apres l'avoir place au spawn.")]
+        public bool faceOrdersAfterPlacement = true;
+
         [Header("HUD")]
         [Tooltip("Distance du HUD devant les yeux du joueur.")]
         public float hudDistance = 2f;
@@ -97,10 +105,15 @@ namespace PotionClassroom
         private int              _tutorialPageIndex = 0;
         private float            _tutorialPlacementUntilTime = -1f;
         private bool             _lockPlayerPlacement = false;
+        private Vector3          _initialRigPosition;
+        private Quaternion       _initialRigRotation;
+        private bool             _hasInitialRigPose = false;
 
         // ------------------------------------------------------------------
         private void Awake()
         {
+            CacheInitialPlayerPose();
+
             if (orderManager != null)
                 orderManager.PrepareForTutorial();
         }
@@ -325,6 +338,9 @@ namespace PotionClassroom
             Transform rig = playerRig != null ? playerRig : FindPlayerRig(cam.transform);
             if (rig == null) return;
 
+            if (TryPlacePlayerAtStartPose(rig, cam))
+                return;
+
             Vector3 targetCenter = GetTutorialTargetCenter();
             Vector3 desiredCameraPosition = targetCenter + tutorialCameraOffsetFromOrders;
             desiredCameraPosition.y = Mathf.Max(desiredCameraPosition.y, tutorialMinimumEyeHeight);
@@ -342,6 +358,55 @@ namespace PotionClassroom
             }
 
             rig.position += desiredCameraPosition - cam.transform.position;
+        }
+
+        private void CacheInitialPlayerPose()
+        {
+            Transform rig = playerRig;
+            if (rig == null)
+            {
+                Camera cam = Camera.main;
+                if (cam != null)
+                    rig = FindPlayerRig(cam.transform);
+            }
+
+            if (rig == null) return;
+
+            _initialRigPosition = rig.position;
+            _initialRigRotation = rig.rotation;
+            _hasInitialRigPose = true;
+        }
+
+        private bool TryPlacePlayerAtStartPose(Transform rig, Camera cam)
+        {
+            bool hasExplicitStartPoint = playerStartPoint != null;
+            if (!hasExplicitStartPoint && (!keepSceneStartPosition || !_hasInitialRigPose))
+                return false;
+
+            Vector3 targetPosition = hasExplicitStartPoint ? playerStartPoint.position : _initialRigPosition;
+            Quaternion targetRotation = hasExplicitStartPoint ? playerStartPoint.rotation : _initialRigRotation;
+            rig.SetPositionAndRotation(targetPosition, targetRotation);
+
+            if (faceOrdersAfterPlacement && orderManager != null && orderManager.displayParent != null)
+                RotateRigTowardTutorialTarget(rig, cam);
+
+            return true;
+        }
+
+        private void RotateRigTowardTutorialTarget(Transform rig, Camera cam)
+        {
+            Vector3 targetCenter = GetTutorialTargetCenter();
+            Vector3 desiredForward = targetCenter - cam.transform.position;
+            desiredForward.y = 0f;
+
+            Vector3 currentForward = cam.transform.forward;
+            currentForward.y = 0f;
+
+            if (desiredForward.sqrMagnitude <= 0.001f || currentForward.sqrMagnitude <= 0.001f)
+                return;
+
+            float yaw = Vector3.SignedAngle(currentForward.normalized, desiredForward.normalized, Vector3.up);
+            rig.RotateAround(cam.transform.position, Vector3.up, yaw);
         }
 
         private Vector3 GetTutorialTargetCenter()

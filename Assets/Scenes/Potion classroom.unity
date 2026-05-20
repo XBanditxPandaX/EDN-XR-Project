@@ -2524,14 +2524,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 324284557}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.04616165, y: -0.9892848, z: 0.12599148, w: -0.05754064}
-  m_LocalPosition: {x: 3.986, y: 0.50699997, z: 1.19}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1224368833}
   m_Father: {fileID: 858761993}
-  m_LocalEulerAnglesHint: {x: 14.75, y: -186.067, z: 4.557}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &324284559
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8780,6 +8780,9 @@ MonoBehaviour:
   gameDuration: 120
   orderManager: {fileID: 532146714}
   playerRig: {fileID: 3012408812359162173}
+  keepSceneStartPosition: 1
+  playerStartPoint: {fileID: 0}
+  faceOrdersAfterPlacement: 1
   hudDistance: 2
   hudVerticalOffset: 0.85
   gameOverDistance: 2
@@ -8788,7 +8791,7 @@ MonoBehaviour:
   showTutorialOnlyOnce: 1
   placePlayerInFrontOfOrders: 1
   tutorialMinimumEyeHeight: 1.85
-  tutorialCameraOffsetFromOrders: {x: 1, y: 0.15, z: -1.65}
+  tutorialCameraOffsetFromOrders: {x: 0.68, y: 0.33, z: -1.42}
   tutorialLookAtOffset: {x: 0, y: 0, z: 0}
   tutorialPlacementLockDuration: 1
   pinTutorialScreenToOrders: 1
@@ -11228,6 +11231,7 @@ MonoBehaviour:
   ingredientAddedSound: {fileID: 0}
   recipeFailSound: {fileID: 0}
   brewSuccessSound: {fileID: 8300000, guid: 0cef40bcb23889145bfeaad79f14e879, type: 3}
+  brewSuccessSoundVolume: 1
   boilingLoopSound: {fileID: 8300000, guid: db1406fdfe4a2d64dac46204c1dbad05, type: 3}
   boilingVolume: 1
   onIngredientAdded:
@@ -21311,15 +21315,15 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3012408812359162174}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 0.125, z: 0}
+  m_LocalRotation: {x: -0, y: -0.07912176, z: -0, w: 0.996865}
+  m_LocalPosition: {x: 0.39, y: -0.46, z: 0.56}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6843951447965971223}
   - {fileID: 858761993}
   m_Father: {fileID: 9188882296418294844}
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -9.076, z: 0}
 --- !u!1 &3012408812359162174
 GameObject:
   m_ObjectHideFlags: 0
@@ -21371,9 +21375,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0cb9aa70a22847b5925ee5f067c10a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 324284561}
   m_OriginBaseGameObject: {fileID: 3012408812359162174}
-  m_CameraFloorOffsetObject: {fileID: 0}
+  m_CameraFloorOffsetObject: {fileID: 858761992}
   m_RequestedTrackingOriginMode: 1
   m_CameraYOffset: 1.36144
 --- !u!114 &4339872008568402642
